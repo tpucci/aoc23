@@ -98,11 +98,12 @@ class InputMap {
                 sourceStart: aRanges.removeAt(0).sourceStart,
                 destinationStart: bRanges.removeAt(0).destinationStart,
                 length: aend - astart)),
-        (int _, int bstart, int aend, int _) when aend < bstart =>
+        (int _, int bstart, int aend, int _) when aend <= bstart =>
           combined.ranges.add(aRanges.removeAt(0)),
-        (int astart, int _, int _, int bend) when bend < astart =>
+        (int astart, int _, int _, int bend) when bend <= astart =>
           combined.ranges.add(bRanges.removeAt(0)),
-        _ => throw "Unexpected case: $aRanges $bRanges"
+        (int astart, int bstart, int aend, int bend) =>
+          throw "Unexpected case: $astart $aend + $bstart $bend"
       };
     }
     return combined;
@@ -192,7 +193,7 @@ void main() {
 
   test('Day 5 - b', () async {
     final start = DateTime.now();
-    final input = await File('inputs/input5.txt')
+    final input = await File('inputs/input5_example.txt')
         .openRead()
         .transform(utf8.decoder)
         .transform(LineSplitter())
@@ -241,7 +242,8 @@ void main() {
       for (var i = range.destinationStart; i < range.destinationEnd; i++) {
         var source = range.sourceMiddle(i);
         if (seedsRanges.any((element) =>
-            element.sourceStart <= source && element.sourceEnd > source)) {
+            element.sourceStart <= source && element.sourceEnd >= source)) {
+          print(i);
           found = true;
           break;
         }
